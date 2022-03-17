@@ -1,0 +1,142 @@
+---
+title: "Analise Exploratoria Covid19 Bauru"
+author: "Danilo Siqueira"
+date: "16/03/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+if(!"readxl" %in% installed.packages()) install.packages("readxl")
+if(!"lubridate" %in% installed.packages()) install.packages("lubridate")
+if(!"xlsx" %in% installed.packages()) install.packages("xlsx")
+if(!"tidyverse" %in% installed.packages()) install.packages("tidyverse")
+if(!"RColorBrewer" %in% installed.packages()) install.packages("RColorBrewer")
+library(RColorBrewer)
+library(readxl)
+library(xlsx)
+library(tidyverse)
+library(lubridate)
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Introduçao
+
+Este relatório apresenta análises dos casos de covid e seu impacto na cidade de Bauru entre 2020-2022. Por ser uma importante cidade na região, estudar essa cidade nos ajuda a entender melhor casos variados e gerais da doença e do vírus.
+Os dados foram coletados do "Jornal da Cidade" de Bauru que obtiveram da Prefeitura Municipal.
+
+# 2. Análise de Dados
+
+Primeiramente, olhando para a idade dos óbitos constatados percebe-se cerca de 70% dos óbitos se concentram em pessoas que estão na faixa etária de 50-84 anos, enquanto menores de idade (0-18) representam aproximadamente 13%. O gráfico da figura 1 representa isso: 
+
+```{r ,echo=FALSE}
+tabelaCasosGeral <- read.csv("C:/Users/danil/OneDrive/Ambiente de Trabalho/4ºTermo - 2021/Análise de Dados/Repositórios Github para RStudio/tf-danilo-siqueira/dados/covid_19_bauru_casos_geral.csv", header = T, sep=";", encoding = "UTF-8")
+tabelaMortes <- read.csv("C:/Users/danil/OneDrive/Ambiente de Trabalho/4ºTermo - 2021/Análise de Dados/Repositórios Github para RStudio/tf-danilo-siqueira/dados/covid_19_bauru_mortes.csv", header = T, sep=";", encoding = "UTF-8")
+
+k <- nclass.Sturges(tabelaMortes$idade)
+minIdade <- min(tabelaMortes$idade,na.rm = TRUE)
+maxIdade <- max(tabelaMortes$idade, na.rm = TRUE)
+
+intervalos <- seq(minIdade,maxIdade + round(((maxIdade - minIdade)/k)),k)
+idade.t <- table(cut(tabelaMortes$idade,breaks = intervalos,right = FALSE))
+
+par(mfrow=c(1,1))
+hist(las = 1,tabelaMortes$idade,col = "black",border= "white",breaks= intervalos,
+     xlab= "Idade dos Infectados",ylab= "Freq.(Pessoas)",
+     main="Figura 1 - Quantidade de Mortes por Idade")
+```
+
+Descobriu-se, ao longo da pandemia, que a covid-19 é mais agressiva em pessoas com comorbidades. Na cidade de Bauru, verifica-se que as comorbidades mais presente entre os óbitos foram Diabetes, seguida de Hipertensão. Outras doenças como Cardiopatia, Obesidade e algumas doenças crônicas também se destacam.
+A Figura 2 mostra a relaçao comorbidade e óbitos onde: DNC = Doença Neurológica Crônica, DRC = Doença Renal Crônica e DCVC = Doença Cardiovascular Crônica.
+
+```{r , echo=FALSE}
+comorbidades <- strsplit(tabelaMortes$comorbidade, " e ")
+
+vetor_comorbidades <- unlist(comorbidades)
+tabela_comorbidades <- table(vetor_comorbidades)
+
+tb_reduzida_comorbidades <- tabela_comorbidades[tabela_comorbidades>=40]
+
+corDegrade <- colorRampPalette(c("yellow","red"))
+barplot(sort(tb_reduzida_comorbidades), ylab = "Nº de mortos",
+        names.arg = c("DNC", "DRC", "DCVC", "OBSD", "Cardiopatia", "Hipert.", "Diabetes"),
+        col = corDegrade(7), main = "Figura 2 - Frequência de Comorbidades em Óbitos")
+
+#Das 7 comorbidades que mais aparecem entre óbitos, Diabetes e Hipertensao sao as mais frequentes.
+
+```
+
+Sabe-se que a covid afeta variadamente cada infectado, e, por isso, sabemos que o tempo de internaçao até óbito ou cura variará também. Analisando os dados fornecidos, na cidade de Bauru, a maioria das internaçoes duraram entre 1-3 semanas (7-21 dias) antes do óbito. É o que mostra o gráfico da Figura 3.
+
+```{r, echo=FALSE}
+data_inicio_sintoma <- strptime(tabelaMortes$inicio_sintoma, "%d/%m/%Y")
+
+data_do_obito <- strptime(tabelaMortes$data_obito, "%d/%m/%Y")
+#Calculando variaçao periodica de obitos e suas respectivas idades
+th <- c()
+idade_obitos <- c()
+i <- 1
+j <- 0
+while (i <= nrow(tabelaMortes)) {
+  if(!is.na(data_inicio_sintoma[i]) && !is.na(data_do_obito[i])) {
+    j = j + 1
+    th[j] = ymd_hms(data_do_obito[i], truncated = 3) - ymd_hms(data_inicio_sintoma[i], truncated = 3)
+    idade_obitos[j] = tabelaMortes$idade[i]
+  }
+  i = i + 1
+}
+
+# Limpando valores negativos
+dias_internado <- th[th >= 0]   #variaçao periodica > 0
+
+idade_positiva_obitos <- idade_obitos[th >= 0]    #idade relativa dos obitos com variaçao periodica > 0
+
+internacao <- table(th[th >= 0])    #Tabela de frequência absoluta
+
+cores <- brewer.pal(8, "BrBG")
+barplot(internacao,main = "Figura 3 - Óbitos por Variaçao Periódica do Tempo de Hospitalizaçao",
+     xlab = "Tempo internado (dias)", ylab = "Óbitos (pessoas)", ylim = c(0,50), col = cores)
+
+```
+
+Agora, analisando a diferença da variaçao periódica de internaçao entre hospitais públicos e privados, percebemos, primeiramente, que há mais pessoas internadas em hospitais públicos do que privados, o que é de se esperar. Também vemos que nos hospitais públicos há uma concentração de pessoas que ficaram de 1-2 semanas internadas, enquanto nos privados o tempo é maior ficando entre 2 e 4 semanas. A análise é demonstrada na figura abaixo:
+
+```{r, echo=FALSE}
+th2 <- c()
+tipo_hosp <- c()
+i <- 1
+j <- 0
+while (i <= nrow(tabelaMortes)) {
+  if(!is.na(data_inicio_sintoma[i]) && !is.na(data_do_obito[i]) && !is.na(tabelaMortes$tipo_hosp)) {
+    j = j + 1
+    th2[j] = ymd_hms(data_do_obito[i], truncated = 3) - ymd_hms(data_inicio_sintoma[i], truncated = 3)
+    tipo_hosp[j] = tabelaMortes$tipo_hosp[i]
+  }
+  i = i + 1
+}
+
+internacao2 <- table(th2[th2 >= 0])    #Tabela de frequência absoluta
+
+dias_internado_2 <- th2[th2 >= 0]
+
+tipo_hosp_tratada <- tipo_hosp[th2 >= 0]
+
+df_hospitalizaco = data.frame(dias = dias_internado_2, hospitalizacao = tipo_hosp_tratada)
+
+dias_pv.t <- table(df_hospitalizaco$dias[df_hospitalizaco$hospitalizacao == "privado"])
+
+dias_pb.t <- table(df_hospitalizaco$dias[df_hospitalizaco$hospitalizacao == "público"])
+
+par(
+  mfrow=c(1,2),
+  mar=c(4,4,1,0)
+)
+
+barplot(dias_pb.t, ylim=c(0,30), col=rgb(1,0,0,0.5) ,
+     xlab="Tempo internado(dias) - Público" , ylab="Óbitos (pessoas)" , main="" )
+
+barplot(dias_pv.t, ylim=c(0,30), col=rgb(0,0,1,0.5) ,
+     xlab="Tempo internado(dias) - Privado" , ylab="Óbitos (pessoas)" , main="")
+
+
+```
