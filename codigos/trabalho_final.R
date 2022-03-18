@@ -56,7 +56,7 @@ idade.t <- table(cut(tabelaMortes$idade,breaks = intervalos,right = FALSE))
 par(mfrow=c(1,1))
 hist(las = 1,tabelaMortes$idade,col = "black",border= "white",breaks= intervalos,
      xlab= "Idade dos Infectados",ylab= "Freq.(Pessoas)",
-     main="Figura 1 - Qunatidade de Mortes por Idade")
+     main="Figura 1 - Quantidade de Mortes por Idade")
 
 cbind("fr" = addmargins(prop.table(idade.t)))
 #Pessoas entre 50-84 anos representam cerca de 70% das mortes e bebês até adultos representam cerca de 13,5%
@@ -75,7 +75,7 @@ cbind("f" = tb_reduzida_comorbidades)
 
 corDegrade <- colorRampPalette(c("yellow","red"))
 corDegrade(7)
-barplot(sort(tb_reduzida_comorbidades), ylab = "Nº de mortos",
+barplot(sort(tb_reduzida_comorbidades), ylab = "Nº de mortos", ylim=c(0,400),
         names.arg = c("DNC", "DRC", "DCVC", "OBSD", "Cardiopatia", "Hipert.", "Diabetes"),
         col = corDegrade(7), main = "Figura 2 - Frequência de Comorbidades em Óbitos")
 
@@ -95,6 +95,7 @@ class(data_do_obito)
 #Calculando variaçao periodica de obitos e suas respectivas idades
 th <- c()
 idade_obitos <- c()
+tipo_hosp <- c()
 i <- 1
 j <- 0
 while (i <= nrow(tabelaMortes)) {

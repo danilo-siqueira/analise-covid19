@@ -1,0 +1,7 @@
+help(load)
+source("trabalho_final.R")
+getwd()
+setwd("/Users/jpalbino/Library/Mobile Documents/com~apple~CloudDocs/GitHub/iaed_2022_trabalhos/tf-danilo-siqueira/")
+source("trabalho_final.R")
+getwd()
+source("/Users/jpalbino/Library/Mobile Documents/com~apple~CloudDocs/GitHub/iaed_2022_trabalhos/tf-danilo-siqueira/codigos/trabalho_final.R")

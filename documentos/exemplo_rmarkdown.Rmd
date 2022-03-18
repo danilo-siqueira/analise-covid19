@@ -2,7 +2,9 @@
 title: "Analise Exploratoria Covid19 Bauru"
 author: "Danilo Siqueira"
 date: "16/03/2022"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -32,6 +34,9 @@ Primeiramente, olhando para a idade dos óbitos constatados percebe-se cerca de 
 ```{r ,echo=FALSE}
 tabelaCasosGeral <- read.csv("C:/Users/danil/OneDrive/Ambiente de Trabalho/4ºTermo - 2021/Análise de Dados/Repositórios Github para RStudio/tf-danilo-siqueira/dados/covid_19_bauru_casos_geral.csv", header = T, sep=";", encoding = "UTF-8")
 tabelaMortes <- read.csv("C:/Users/danil/OneDrive/Ambiente de Trabalho/4ºTermo - 2021/Análise de Dados/Repositórios Github para RStudio/tf-danilo-siqueira/dados/covid_19_bauru_mortes.csv", header = T, sep=";", encoding = "UTF-8")
+
+#tabelaCasosGeral <- read.csv("/Users/jpalbino/Library/Mobile Documents/com~apple~CloudDocs/GitHub/iaed_2022_trabalhos/tf-danilo-siqueira/dados/covid_19_bauru_casos_geral.csv", header = T, sep=";", encoding = "UTF-8")
+#tabelaMortes <- read.csv("/Users/jpalbino/Library/Mobile Documents/com~apple~CloudDocs/GitHub/iaed_2022_trabalhos/tf-danilo-siqueira/dados/covid_19_bauru_mortes.csv", header = T, sep=";", encoding = "UTF-8")
 
 k <- nclass.Sturges(tabelaMortes$idade)
 minIdade <- min(tabelaMortes$idade,na.rm = TRUE)
