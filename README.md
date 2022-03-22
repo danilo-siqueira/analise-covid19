@@ -1,2 +1,3 @@
-# tf-danilo-siqueira
-Repositório para entrega do Tópico 10 - Trabalho Final da disciplina optativa IAED 2021/2022.
+# Projeto Final
+Repositório para entrega do Projeto Final - Trabalho Final da disciplina Introdução à Análise Exploratória de Dados.
+Projeto sobre a análise dos dados relativos ao covid-19 na cidade de Bauru.
